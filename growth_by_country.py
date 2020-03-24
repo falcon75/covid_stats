@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import json
 import scipy.optimize as opt
 import numpy as np
-import math
 
 
 def f(x, a, b, c, d):
