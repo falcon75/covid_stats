@@ -19,13 +19,16 @@ def plot_data_model_100(data, countries, project):
         c = colours.pop()
         print(country, consts, off)
 
+        m = len(data[country])
+
         # Create time series over which to plot, including a projection into the future
-        x_r = np.linspace(0, len(data[country]) - 1, len(data[country]))
-        x = np.linspace(0, len(data[country]) + project, len(data[country]) + project + 1)
+        x_r = np.linspace(0, m - 1, m)
+        x = np.linspace(0, m + project, m + project + 1)
+
+        y = dp.f(x, *consts)
 
         # Plot, inc the offset
-        y = dp.f(x + off, *consts)
-        plt.plot(x, y, (c + '--'))
+        plt.plot((x - off)[(m-2):], y[(m-2):], (c + '--'))
         plt.plot(x_r - off, data[country], (c + '-'), label=country) # + str(np.sqrt(np.diag(cov)))))
         plt.plot((x_r - off)[-1], data[country][-1], (c + 'o'))
 
