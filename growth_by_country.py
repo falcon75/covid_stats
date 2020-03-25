@@ -4,6 +4,8 @@ import scipy.optimize as opt
 import numpy as np
 
 
+# Logistic curve and inverse functions for fitting
+
 def f(x, a, b, c, d):
     return a / (1. + np.exp(-c * (x - d))) + b
 
@@ -11,6 +13,8 @@ def f(x, a, b, c, d):
 def f_inv(y, a, b, c, d):
     return d - ((np.log(a / (y - b) - 1)) / c)
 
+
+# Read the local data file to obtain number of confirmed cases by country
 
 def confirmed_cases():
 
@@ -42,6 +46,8 @@ def confirmed_cases():
         return data
 
 
+# Plot the cases for some countries roughly aligned to the hundredth case.
+
 def log_plot_cases_adjusted(data, countries):
 
     data_100 = {}
@@ -72,16 +78,18 @@ def fit_logistic_curve(data, country):
     # Key issue fixed, an inital estimate for the curve allows much more reliable finding
     # I used a one instance of fitting spain, this may have to be changed
 
-    consts, a = opt.curve_fit(f, x, y, p0=(-72223,  72151, -0.260743, 62.356))
+    consts, cov = opt.curve_fit(f, x, y, p0=(-72223,  72151, -0.260743, 62.356))
 
-    return consts
+    return consts, cov
 
+
+# Plots countries model and actual data with a projection
 
 def plot_data_model(data, countries, project):
 
     for country in countries:
 
-        consts = fit_logistic_curve(data, country)
+        consts, _ = fit_logistic_curve(data, country)
         x = np.linspace(0, len(data[country]) + project - 1, len(data[country]) + project)
         y = f(x, *consts)
         plt.plot(x, data[country])
@@ -90,6 +98,8 @@ def plot_data_model(data, countries, project):
     plt.show()
 
 
+# Main plot, logarithmic with projected growth curves based on fitting logistic regression
+
 def plot_data_model_100(data, countries, project):
 
     colours = ['g', 'b', 'c', 'm', 'y', 'k']
@@ -97,7 +107,7 @@ def plot_data_model_100(data, countries, project):
     for country in countries:
 
         # Fit logistic curve, return consts in logistic function
-        consts = fit_logistic_curve(data, country)
+        consts, cov = fit_logistic_curve(data, country)
 
         # Calculate and offset to align graphs at the 100th case (make variable)
         off = f_inv(100, *consts)
@@ -111,17 +121,22 @@ def plot_data_model_100(data, countries, project):
         # Plot, inc the offset
         y = f(x + off, *consts)
         plt.plot(x, y, (c + '--'))
-        plt.plot(x_r - off, data[country], (c + '-'), label=country)
+        plt.plot(x_r - off, data[country], (c + '-'), label=country) # + str(np.sqrt(np.diag(cov)))))
+        plt.plot((x_r - off)[-1], data[country][-1], (c + 'o'))
 
     # Plot China
+    off_c = 5
     data_set = data["China"]
-    plt.plot(np.linspace(0, len(data_set) - 1, len(data_set)) + 5, data_set, 'r-',label='China')
+    plt.plot(np.linspace(0, len(data_set) - 1, len(data_set)) + off_c, data_set, 'r-',label='China')
+    plt.plot(len(data_set) + off_c - 1, data_set[-1], 'ro')
 
     # Plot Formatting
     plt.ylim(90, 200000)
-    plt.xlim(-1, 60)
+    plt.xlim(-1, 70)
     plt.xlabel('Days since hundredth case')
     plt.ylabel('Number of cases')
+    plt.yscale('log')
+    plt.title("Cases over time for COVID19, dashed line - logistic regression fit")
     plt.legend()
     plt.show()
 

@@ -2,6 +2,8 @@ import requests
 import json
 
 
+# Fetches new data and overwrite the local data
+
 def update_data():
 
     url = "https://pomber.github.io/covid19/timeseries.json"
