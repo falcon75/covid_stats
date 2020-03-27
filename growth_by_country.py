@@ -39,8 +39,9 @@ def plot_data_model_100(data, countries, project):
     plt.plot(len(data_set) + off_c - 1, data_set[-1], 'ro')
 
     # Plot Formatting
-    plt.ylim(90, 200000)
+    plt.ylim(90, 300000)
     plt.xlim(-1, 70)
+    plt.grid(b=True)
     plt.xlabel('Days since hundredth case')
     plt.ylabel('Number of cases')
     plt.yscale('log')
